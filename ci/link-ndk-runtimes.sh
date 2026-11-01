@@ -38,14 +38,14 @@ for A in aarch64 x86_64; do
         exit 1
     fi
 
-    mkdir -p "$RES/lib/linux/$A"
-    ln -sf "$BUILTINS" "$RES/lib/linux/"
-    ln -sf "$UNWIND" "$RES/lib/linux/$A/"
+    sudo mkdir -p "$RES/lib/linux/$A"
+    sudo ln -sf "$BUILTINS" "$RES/lib/linux/"
+    sudo ln -sf "$UNWIND" "$RES/lib/linux/$A/"
 
     DIR="$RES/lib/${A}-unknown-linux-android28"
     mkdir -p "$DIR"
-    ln -sf "$BUILTINS" "$DIR/libclang_rt.builtins.a"
-    ln -sf "$UNWIND" "$DIR/libunwind.a"
+    sudo ln -sf "$BUILTINS" "$DIR/libclang_rt.builtins.a"
+    sudo ln -sf "$UNWIND" "$DIR/libunwind.a"
 done
 
 EXPECTED="$RES/lib/aarch64-unknown-linux-android28/libclang_rt.builtins.a"
