@@ -43,7 +43,7 @@ for A in aarch64 x86_64; do
     sudo ln -sf "$UNWIND" "$RES/lib/linux/$A/"
 
     DIR="$RES/lib/${A}-unknown-linux-android28"
-    mkdir -p "$DIR"
+    sudo mkdir -p "$DIR"
     sudo ln -sf "$BUILTINS" "$DIR/libclang_rt.builtins.a"
     sudo ln -sf "$UNWIND" "$DIR/libunwind.a"
 done
