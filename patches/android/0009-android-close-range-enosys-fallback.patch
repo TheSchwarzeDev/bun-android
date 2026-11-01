@@ -1,0 +1,29 @@
+From 001dd69cecf5691379d6e7e2804a4c3f16a2806c Mon Sep 17 00:00:00 2001
+From: Android Compatibility <android@localhost>
+Date: Sun, 1 Nov 2026 17:22:03 +1100
+Subject: [PATCH] fix(android): avoid seccomp-killed close_range syscall
+
+---
+ src/jsc/bindings/c-bindings.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/jsc/bindings/c-bindings.cpp b/src/jsc/bindings/c-bindings.cpp
+index 481ccdd..4df235f 100644
+--- a/src/jsc/bindings/c-bindings.cpp
++++ b/src/jsc/bindings/c-bindings.cpp
+@@ -278,7 +278,12 @@ extern "C" void windows_enable_stdio_inheritance()
+ // close_range is glibc > 2.33, which is very new
+ extern "C" ssize_t bun_close_range(unsigned int start, unsigned int end, unsigned int flags)
+ {
++#if defined(__ANDROID__)
++    errno = ENOSYS;
++    return -1;
++#else
+     return syscall(__NR_close_range, start, end, flags);
++#endif
+ }
+ #else // OS(FREEBSD)
+ // FreeBSD 12.2+ libc has close_range; 14.0+ supports CLOSE_RANGE_CLOEXEC
+-- 
+2.56.0
+
