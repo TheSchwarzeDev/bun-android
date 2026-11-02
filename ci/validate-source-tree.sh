@@ -52,3 +52,13 @@ status=$(git status --porcelain)
 [ -z "$status" ] || { echo "tree not clean after patches:"; echo "$status" >&2; exit 1; }
 
 echo "validate-source-tree: OK ($(git rev-parse --short HEAD), $(ls "$ROOT"/patches/android/*.patch 2>/dev/null | wc -l) patches)"
+
+echo
+echo "=== Diagnostic: pidfd_open references in patched upstream source ==="
+grep -RInI \
+  --exclude-dir=.git \
+  --exclude-dir=node_modules \
+  --exclude-dir=build \
+  -E 'pidfd_open|SYS_pidfd_open|__NR_pidfd_open|P_PIDFD' \
+  "$SOURCE_DIR" || true
+echo "=== End pidfd diagnostic ==="
