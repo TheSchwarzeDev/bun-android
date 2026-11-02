@@ -22,7 +22,7 @@ COMMIT=$(m "upstream.commit")
 SHA256=$(m "upstream.tarball_sha256")
 TAG=$(m "upstream.tag")
 
-cd "$SOURCE_DIR"
+cd "$ROOT/$SOURCE_DIR"
 
 # The codeload tarball ships no VERSION file; anchor the version on files that
 # only exist at the pinned commit (scripts/build/ is the Rust-era build system).
@@ -60,5 +60,5 @@ grep -RInI \
   --exclude-dir=node_modules \
   --exclude-dir=build \
   -E 'pidfd_open|SYS_pidfd_open|__NR_pidfd_open|P_PIDFD' \
-  "$SOURCE_DIR" || true
+  "$ROOT/$SOURCE_DIR" || true
 echo "=== End pidfd diagnostic ==="
