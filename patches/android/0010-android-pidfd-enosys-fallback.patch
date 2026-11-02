@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000010 Mon Sep 17 00:00:00 2001
+From: Android Port <android-port@localhost>
+Date: Mon, 2 Nov 2026 00:00:00 +0000
+Subject: [PATCH] fix(android): use waiter fallback instead of pidfd syscall
+
+Android 9 seccomp can terminate the process when pidfd_open is called.
+Return ENOSYS directly so Bun's existing waiter-thread fallback can
+handle child-process monitoring.
+
+---
+ src/sys/linux_syscall.rs | 17 +++++------------
+ 1 file changed, 5 insertions(+), 12 deletions(-)
+
+diff --git a/src/sys/linux_syscall.rs b/src/sys/linux_syscall.rs
+--- a/src/sys/linux_syscall.rs
++++ b/src/sys/linux_syscall.rs
+@@ -503,20 +503,9 @@
+ /// Android: rustix 0.38 gates `process::pidfd_open` behind
+-/// `cfg(target_os = "linux")`, but the kernel ABI is identical (same generic
+-/// syscall number 434 since Linux 5.3, before any Android NDK target shipped).
+-/// Raw-syscall it like the other shims here.
++/// `cfg(target_os = "linux")`. Android 9 seccomp may kill the process when
++/// syscall 434 is attempted. Report ENOSYS instead, allowing Bun's existing
++/// waiter-thread fallback to handle child-process monitoring.
+ #[inline]
+ #[cfg(target_os = "android")]
+-pub(crate) fn pidfd_open(pid: i32, flags: u32) -> Result<Fd, i32> {
+-    if pid <= 0 {
+-        return Err(libc::EINVAL);
+-    }
+-    // libc 0.2.x doesn't expose `SYS_pidfd_open` for Android either, so use
+-    // the kernel constant. `pidfd_open` has the same number on every arch.
+-    const SYS_PIDFD_OPEN: libc::c_long = 434;
+-    // SAFETY: raw `pidfd_open(2)`; kernel validates pid/flags.
+-    let rc = unsafe { libc::syscall(SYS_PIDFD_OPEN, pid, flags) };
+-    if rc < 0 {
+-        return Err(errno());
+-    }
+-    Ok(Fd::from_native(rc as i32))
++pub(crate) fn pidfd_open(_pid: i32, _flags: u32) -> Result<Fd, i32> {
++    Err(libc::ENOSYS)
+ }
+--
+2.43.0

@@ -80,3 +80,21 @@ do
   sed -n "${start},${end}p" "$ROOT/$SOURCE_DIR/$file"
 done
 echo "=== End pidfd context ==="
+
+echo
+echo "=== pidfd implementation and fallback context ==="
+for spec in \
+  "src/sys/linux_syscall.rs:480:525" \
+  "src/spawn/process.rs:970:1020" \
+  "src/spawn/process.rs:3740:3790" \
+  "src/spawn_sys/spawn_process.rs:490:565" \
+  "src/spawn_sys/spawn_process.rs:970:1020"
+do
+  file=${spec%%:*}
+  rest=${spec#*:}
+  start=${rest%%:*}
+  end=${rest##*:}
+  echo "--- $file lines $start-$end ---"
+  sed -n "${start},${end}p" "$ROOT/$SOURCE_DIR/$file"
+done
+echo "=== End pidfd context ==="
